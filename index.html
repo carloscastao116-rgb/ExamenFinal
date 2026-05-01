@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Economía - Mis Apuntes</title>
+    <title>Simulador de Economía - Con Ejemplos</title>
     <style>
         :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --correct: #dcfce7; --incorrect: #fee2e2; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
@@ -16,7 +16,8 @@
         .option:hover:not(:disabled) { border-color: var(--primary); background: #f0f7ff; }
         .correct { background: var(--correct) !important; border-color: #22c55e !important; color: #14532d; font-weight: bold; }
         .incorrect { background: var(--incorrect) !important; border-color: #ef4444 !important; color: #7f1d1d; }
-        .explanation { margin-top: 20px; padding: 15px; background: #f1f5f9; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; }
+        .explanation-box { margin-top: 20px; padding: 15px; background: #f1f5f9; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; }
+        .example-box { margin-top: 10px; padding: 10px; background: #e0f2fe; border-radius: 8px; border: 1px dashed #0ea5e9; font-style: italic; font-size: 0.95rem; }
         .btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1rem; }
         .hidden { display: none; }
     </style>
@@ -25,14 +26,20 @@
 <div class="container">
     <div id="quiz">
         <div class="header">
-            <span id="topic-title">MÓDULO | TEMA</span>
+            <span id="topic-title">MÓDULO</span>
             <div id="progress" class="meta">Pregunta 1 de 40</div>
         </div>
         <h2 id="question">Cargando...</h2>
         <div id="options"></div>
-        <div id="feedback" class="explanation hidden">
-            <b style="color:var(--primary)">IDEA CLAVE:</b>
-            <p id="desc" style="margin: 5px 0 0 0"></p>
+        <div id="feedback" class="hidden">
+            <div class="explanation-box">
+                <b style="color:var(--primary)">IDEA CLAVE (Examen):</b>
+                <p id="desc" style="margin: 5px 0 0 0"></p>
+            </div>
+            <div class="example-box">
+                <b>💡 Ejemplo para entenderlo:</b>
+                <p id="example-text" style="margin: 5px 0 0 0"></p>
+            </div>
         </div>
         <button id="next" class="btn hidden">Siguiente Pregunta</button>
     </div>
@@ -45,52 +52,333 @@
 
 <script>
 const questionsData = [
-    { module: "Microeconomía", topic: "Oferta y demanda", question: "¿Qué describe correctamente la demanda de un bien?", options: { A: "La relación entre precios y producción.", B: "La relación entre distintos precios posibles y las cantidades que los consumidores desean comprar.", C: "El deseo de compra sin importar el precio.", D: "La cantidad fija vendida." }, answer: "B", explanation: "En tus apuntes se distingue entre demanda y cantidad demandada: la demanda es la relación completa entre precio y cantidad deseada." },
-    { module: "Microeconomía", topic: "Cambios en curvas", question: "Si sube el precio del café y, por ello, algunos consumidores compran más té, ¿qué ocurre en el mercado del té?", options: { A: "La demanda baja.", B: "La demanda del té se desplaza a la derecha.", C: "La oferta se desplaza.", D: "No ocurre nada." }, answer: "B", explanation: "Tus resúmenes remarcan que el cambio en el precio de un bien sustitutivo desplaza la curva de demanda del otro bien." },
-    { module: "Microeconomía", topic: "Excedente", question: "Una persona estaba dispuesta a pagar 18 euros por un libro y finalmente lo compra por 12 euros. ¿Cuál es su excedente del consumidor?", options: { A: "6 euros.", B: "12 euros.", C: "18 euros.", D: "30 euros." }, answer: "A", explanation: "El excedente del consumidor es la diferencia entre la disposición máxima a pagar y el precio realmente pagado." },
-    { module: "Microeconomía", topic: "Coordinación", question: "Si el precio de un bien se fija por debajo del precio de coordinación en un mercado competitivo, ¿qué resultado es más probable?", options: { A: "Exceso de oferta.", B: "Una escasez o desabastecimiento.", C: "Equilibrio.", D: "Baja de calidad." }, answer: "B", explanation: "Los apuntes insisten en que un precio por debajo del equilibrio genera escasez porque la cantidad demandada supera a la ofrecida." },
-    { module: "Microeconomía", topic: "Precios", question: "Según el bloque sobre precios, ¿cuál es una función central del precio de mercado?", options: { A: "Garantizar igualdad de renta.", B: "Seleccionar a quienes más valoran el bien y a quienes lo producen con menor coste de oportunidad.", C: "Fijar el valor ético.", D: "Eliminar la competencia." }, answer: "B", explanation: "En el resumen de micro se explica que el precio coordina planes y asigna el bien a quienes lo valoran más, mientras atrae a oferentes con menores costes relativos." },
-    { module: "Microeconomía", topic: "Elección", question: "En la elección óptima del consumidor, la relación marginal de sustitución entre dos bienes tiende a igualarse a:", options: { A: "El coste total.", B: "La renta disponible.", C: "La relación entre los precios de ambos bienes.", D: "La cantidad consumida." }, answer: "C", explanation: "Tus apuntes de micro resumen la condición de óptimo como igualdad entre la relación marginal de sustitución y la relación de precios." },
-    { module: "Microeconomía", topic: "Producción", question: "Según el curso, el precio de un factor productivo se explica principalmente por:", options: { A: "El coste histórico.", B: "La productividad marginal esperada de ese factor.", C: "La decisión del gobierno.", D: "El valor del bien final." }, answer: "B", explanation: "El bloque de salarios y tipos de interés presenta los precios de los factores como derivados de su productividad marginal esperada." },
-    { module: "Microeconomía", topic: "Salarios", question: "¿Cuál de estas afirmaciones encaja mejor con el bloque de salarios de tus apuntes?", options: { A: "Los salarios son fijos.", B: "Dependen de la caridad.", C: "Las mejoras salariales sostenibles dependen sobre todo de aumentos de productividad.", D: "Suben por ley siempre." }, answer: "C", explanation: "El resumen rechaza la ley de hierro de los salarios y repite que las mejoras salariales sostenibles requieren productividad más alta." },
-    { module: "Microeconomía", topic: "Elasticidad", question: "Si la demanda de un bien es elástica, una subida de precio tenderá a:", options: { A: "Subir ingresos.", B: "No afectar nada.", C: "Reducir los ingresos totales.", D: "Aumentar la cantidad." }, answer: "C", explanation: "Tus apuntes de elasticidad indican que con demanda elástica, subir el precio reduce lo bastante la cantidad como para bajar los ingresos." },
-    { module: "Microeconomía", topic: "Elasticidad cruzada", question: "Si la elasticidad cruzada entre dos bienes es positiva, lo más probable es que sean:", options: { A: "Complementarios.", B: "Inferiores.", C: "Bienes sustitutivos.", D: "De lujo." }, answer: "C", explanation: "En el resumen de micro, la elasticidad cruzada sirve precisamente para distinguir sustitutivos de complementarios." },
-    { module: "Microeconomía", topic: "Precios", question: "Un precio máximo fijado por debajo del precio de mercado suele generar:", options: { A: "Escasez, colas y posible mercado negro.", B: "Exceso de oferta.", C: "Eficiencia.", D: "Baja de precios futuros." }, answer: "A", explanation: "Los apuntes y el PDF sobre controles de precios asocian el precio techo por debajo del mercado con desabastecimiento, racionamiento y mercado negro." },
-    { module: "Microeconomía", topic: "Precios mínimos", question: "Un precio mínimo fijado por encima del precio de mercado suele provocar:", options: { A: "Escasez.", B: "Excedentes no vendidos y, en algunos casos, desempleo o capacidad ociosa.", C: "Aumento de ventas.", D: "Equilibrio justo." }, answer: "B", explanation: "Tus apuntes destacan que el precio suelo por encima del equilibrio genera excedentes, desempleo o capacidad ociosa y peor asignación." },
-    { module: "Microeconomía", topic: "Externalidades", question: "Si una actividad genera una externalidad negativa y no se internaliza, el mercado tenderá a:", options: { A: "Producir menos.", B: "Producir más de lo socialmente eficiente.", C: "No producir nada.", D: "Ser eficiente." }, answer: "B", explanation: "En el bloque de externalidades se explica que las negativas empujan a sobreproducción o sobreconsumo respecto al óptimo social." },
-    { module: "Microeconomía", topic: "Coase", question: "Según el teorema de Coase, una solución privada a una externalidad es más plausible cuando:", options: { A: "Los derechos de propiedad están bien definidos y los costes de transacción son bajos.", B: "El estado interviene.", C: "Los costes son altos.", D: "No hay propiedad." }, answer: "A", explanation: "Tus resúmenes de micro recogen exactamente esas dos condiciones: derechos definidos y costes de transacción bajos." },
-    { module: "Microeconomía", topic: "Empresa", question: "Una empresa competitiva que maximiza beneficios debería producir hasta el punto en que:", options: { A: "Precio sea menor al coste.", B: "El precio sea igual al coste marginal.", C: "El coste sea cero.", D: "El ingreso sea máximo." }, answer: "B", explanation: "El bloque de empresa y beneficios resume la regla de maximización de forma clara: producir hasta que precio iguale al coste marginal." },
-    { module: "Microeconomía", topic: "Largo plazo", question: "En equilibrio competitivo de largo plazo, la entrada y salida de empresas tiende a llevar el mercado hacia:", options: { A: "Precio igual a coste medio mínimo.", B: "Monopolio.", C: "Pérdidas.", D: "Precios infinitos." }, answer: "A", explanation: "Tus apuntes indican que la entrada y salida empujan al largo plazo hacia una situación de precio igual al coste medio mínimo." },
-    { module: "Microeconomía", topic: "Competencia", question: "¿Qué entiende el curso por competencia dinámica?", options: { A: "Muchos vendedores estáticos.", B: "Un sistema de libre entrada y salida, rivalidad y descubrimiento empresarial.", C: "Precios fijos.", D: "Intervención estatal." }, answer: "B", explanation: "En la parte de competencia se diferencia entre la foto estática de muchas empresas y la visión dinámica basada en rivalidad y libre entrada." },
-    { module: "Microeconomía", topic: "Carteles", question: "¿Por qué los carteles tienden a ser inestables según tus apuntes?", options: { A: "Por el gobierno.", B: "Por falta de demanda.", C: "Porque pueden entrar nuevos competidores y, además, cada miembro tiene incentivos a hacer trampa.", D: "Son muy estables." }, answer: "C", explanation: "Tanto el resumen como el PDF sobre oligopolios y carteles recalcan las dos fuentes de inestabilidad: entrada externa y engaño interno." },
-    { module: "Microeconomía", topic: "Bienes", question: "Una pesquería de acceso libre encaja mejor en la categoría de:", options: { A: "Bien privado.", B: "Bien público puro.", C: "Monopolio.", D: "Recurso común." }, answer: "D", explanation: "En tu esquema de bienes, los recursos comunes son rivales en consumo y no excluibles, justo la lógica de una pesquería abierta." },
-    { module: "Microeconomía", topic: "Comercio", question: "Un arancel sobre un bien importado tiende a:", options: { A: "Bajar el precio.", B: "Subir el precio interno, reducir el consumo y generar pérdida irrecuperable.", C: "Ayudar al consumidor.", D: "Aumentar importaciones." }, answer: "B", explanation: "Tus apuntes de libre comercio resumen el efecto del arancel como precio interno más alto, menor consumo, menos importaciones y pérdida irrecuperable." },
-    { module: "Macroeconomía", topic: "PIB", question: "Según el enfoque del gasto, el PIB se calcula como:", options: { A: "C+I+G.", B: "C+I+G+X.", C: "C + I + G + X - M.", D: "Ventas totales." }, answer: "C", explanation: "El resumen de macro recoge la identidad básica del PIB por gasto: consumo, inversión, gasto público y exportaciones netas." },
-    { module: "Macroeconomía", topic: "PIB", question: "¿Por qué las importaciones se restan en el PIB por el enfoque del gasto?", options: { A: "Porque no forman parte de la producción realizada dentro del territorio.", B: "Porque son caras.", C: "Porque no se consumen.", D: "Es un error contable." }, answer: "A", explanation: "Tus apuntes recalcan que las importaciones se restan porque ese gasto no corresponde a producción interna." },
-    { module: "Macroeconomía", topic: "Valor agregado", question: "¿Qué problema busca evitar el enfoque del valor agregado por etapas?", options: { A: "La inflación.", B: "La doble contabilización de bienes intermedios.", C: "El desempleo.", D: "La caída del PIB." }, answer: "B", explanation: "Tanto el resumen como el PDF de PIB explican el valor agregado como herramienta para evitar contar varias veces la misma producción." },
-    { module: "Macroeconomía", topic: "PIB Real/Nominal", question: "¿Qué mide mejor el PIB real frente al PIB nominal?", options: { A: "Los precios.", B: "Los cambios en cantidades producidas aislando, en lo posible, el efecto de los precios.", C: "La riqueza total.", D: "La deuda." }, answer: "B", explanation: "Tus apuntes subrayan que el PIB nominal mezcla precio y cantidad, mientras el real intenta quedarse con la variación de cantidades." },
-    { module: "Macroeconomía", topic: "Deflactor", question: "Si sube el deflactor del PIB, eso indica que:", options: { A: "Sube el paro.", B: "Los precios medios de la producción interna están aumentando.", C: "Baja la producción.", D: "Exportamos más." }, answer: "B", explanation: "El resumen de macro presenta el deflactor como una medida amplia de precios de la producción interna." },
-    { module: "Macroeconomía", topic: "IPC/Deflactor", question: "¿Cuál es la diferencia más correcta entre IPC y deflactor del PIB?", options: { A: "No hay diferencia.", B: "El IPC mide producción.", C: "El IPC se centra en el consumo de los hogares y el deflactor refleja precios de la producción interna.", D: "El deflactor es para el consumo." }, answer: "C", explanation: "En tus apuntes se repite que el IPC sirve mejor para coste de vida y el deflactor para precios de lo producido dentro del país." },
-    { module: "Macroeconomía", topic: "Flujo/Stock", question: "El PIB es, sobre todo, una variable de tipo:", options: { A: "Stock.", B: "Flujo.", C: "Estática.", D: "Deuda." }, answer: "B", explanation: "El PDF sobre definición de PIB lo trata expresamente como variable flujo, no como stock." },
-    { module: "Macroeconomía", topic: "Productividad", question: "La productividad marginal decreciente implica que, si un factor permanece fijo y se añade mucho del otro:", options: { A: "La producción sube siempre.", B: "El producto marginal del factor variable tiende a caer.", C: "El coste baja.", D: "No afecta." }, answer: "B", explanation: "El bloque de función de producción usa este principio para explicar por qué la acumulación de un solo factor tiene límites." },
-    { module: "Macroeconomía", topic: "Interés", question: "Según tus apuntes, el tipo de interés puede descomponerse en:", options: { A: "Riesgo y dinero.", B: "Prima temporal, prima de riesgo y prima de liquidez.", C: "Solo inflación.", D: "Salarios y rentas." }, answer: "B", explanation: "El resumen de macro descompone el interés en tiempo, riesgo y liquidez, que es una de las ideas centrales del tema." },
-    { module: "Macroeconomía", topic: "VPN/TIR", question: "Un proyecto con VPN positivo y TIR superior al coste de oportunidad del capital debería:", options: { A: "Rechazarse.", B: "Aceptarse, ya que crea valor.", C: "Esperar un año.", D: "No se puede saber." }, answer: "B", explanation: "Tus apuntes son directos: si el VPN es positivo y la TIR supera el coste de oportunidad, el proyecto crea valor." },
-    { module: "Macroeconomía", topic: "Dinero", question: "¿Cuál de estas opciones recoge mejor una función del dinero?", options: { A: "Crear riqueza.", B: "Servir como medio de intercambio y unidad de cuenta.", C: "Pagar deudas públicas.", D: "Ser de oro." }, answer: "B", explanation: "En el bloque sobre dinero, los apuntes explican funciones clásicas como medio de intercambio, unidad de cuenta y depósito de valor." },
-    { module: "Macroeconomía", topic: "Inflación", question: "¿Qué subraya la visión cualitativista de la inflacion?", options: { A: "Solo la oferta de dinero.", B: "Que la demanda de dinero, su liquidez y la confianza también importan.", C: "Que el oro no sirve.", D: "Que el estado debe fijar precios." }, answer: "B", explanation: "El resumen de macro insiste en que no basta mirar la oferta monetaria: también importa la demanda de dinero y su calidad." },
-    { module: "Macroeconomía", topic: "Política Monetaria", question: "Si un banco central compra activos en mercado abierto, normalmente:", options: { A: "Sube el paro.", B: "Inyecta liquidez, eleva el precio del activo y tiende a bajar su rendimiento.", C: "Baja la inflación.", D: "Drena dinero." }, answer: "B", explanation: "Tus apuntes explican que la compra de activos inyecta reservas, sube el precio del activo y reduce su rendimiento." },
-    { module: "Macroeconomía", topic: "Bancos", question: "Los bancos comerciales no pueden crear dinero ilimitadamente porque enfrentan límites de:", options: { A: "Papel moneda.", B: "Liquidez, solvencia, demanda de crédito solvente y conversión en dinero del banco central.", C: "Horarios de apertura.", D: "Número de clientes." }, answer: "B", explanation: "El bloque de dinero bancario insiste en esos límites: liquidez, solvencia, crédito solvente y conversión final en dinero del banco central." },
-    { module: "Macroeconomía", topic: "Política Fiscal", question: "Una política fiscal expansiva suele implicar:", options: { A: "Subir impuestos.", B: "Bajar el gasto.", C: "Bajar impuestos o subir gasto, aumentando el sesgo expansivo del saldo fiscal.", D: "No hacer nada." }, answer: "C", explanation: "Tus apuntes de política fiscal resumen el enfoque convencional así: menos impuestos o más gasto equivalen a un sesgo expansivo." },
-    { module: "Macroeconomía", topic: "Estabilizadores", question: "¿Cuál de los siguientes es un estabilizador automático?", options: { A: "Obras públicas nuevas.", B: "El seguro de desempleo que aumenta el gasto cuando entra la recesión.", C: "Subir tipos de interés.", D: "Imprimir billetes." }, answer: "B", explanation: "El resumen de macro cita de forma expresa el seguro de desempleo y la caída automática de recaudación en recesión." },
-    { module: "Macroeconomía", topic: "Multiplicador", question: "¿Cuál es una de las críticas principales al multiplicador fiscal?", options: { A: "No existe.", B: "Que el endeudamiento público puede desplazar financiación privada mediante crowding out.", C: "Que es muy lento.", D: "Que solo ayuda a ricos." }, answer: "B", explanation: "Tus apuntes recogen varias críticas, y una de las más claras es el crowding out: deuda pública que desplaza crédito privado." },
-    { module: "Macroeconomía", topic: "Solow", question: "En el modelo de Solow, si la inversión por trabajador supera la depreciación más la dilución, entonces:", options: { A: "El capital cae.", B: "El capital por trabajador se profundiza y aumenta.", C: "La economía se detiene.", D: "No hay cambio." }, answer: "B", explanation: "El resumen de Solow distingue entre ampliación y profundización del capital: si la inversión supera depreciación y dilución, k por trabajador aumenta." },
-    { module: "Macroeconomía", topic: "Regla de Oro", question: "La regla de oro de Solow busca el nivel de capital por trabajador que:", options: { A: "Maximiza el consumo sostenible de largo plazo.", B: "Maximiza el PIB.", C: "Elimina el paro.", D: "Es cero." }, answer: "A", explanation: "Tus apuntes aclaran que la regla de oro no busca acumular sin límite, sino el capital que maximiza el consumo sostenible." },
-    { module: "Macroeconomía", topic: "Salario Mínimo", question: "Si el salario mínimo sube claramente por encima de la productividad, tenderá a:", options: { A: "Aumentar el empleo.", B: "Reducir la demanda de trabajo de esas personas.", C: "No afectar.", D: "Mejorar la economía." }, answer: "B", explanation: "El resumen de macro relaciona salario máximo sostenible y productividad económica; si el salario exigido supera esa productividad, cae la demanda de trabajo." }
+    { 
+        module: "Microeconomía", topic: "Oferta y demanda", 
+        question: "¿Qué describe correctamente la demanda de un bien?", 
+        options: { A: "La relación entre precios y producción.", B: "La relación entre distintos precios posibles y las cantidades que los consumidores desean comprar.", C: "El deseo de compra sin importar el precio.", D: "La cantidad fija vendida." }, 
+        answer: "B", 
+        explanation: "En tus apuntes se distingue entre demanda y cantidad demandada: la demanda es la relación completa entre precio y cantidad deseada.",
+        example: "No es solo cuántos panes compras hoy, sino cuántos comprarías si el pan costara 0.50€, cuánto si costara 1€, etc. Es toda la lista de posibilidades."
+    },
+    { 
+        module: "Microeconomía", topic: "Cambios en curvas", 
+        question: "Si sube el precio del café y, por ello, algunos consumidores compran más té, ¿qué ocurre en el mercado del té?", 
+        options: { A: "La demanda baja.", B: "La demanda del té se desplaza a la derecha.", C: "La oferta se desplaza.", D: "No ocurre nada." }, 
+        answer: "B", 
+        explanation: "Tus resúmenes remarcan que el cambio en el precio de un bien sustitutivo desplaza la curva de demanda del otro bien.",
+        example: "Si Netflix sube de precio, mucha gente se va a HBO. HBO vende más aunque ellos no hayan cambiado su precio. Su curva de demanda se movió a la derecha por culpa de la competencia."
+    },
+    { 
+        module: "Microeconomía", topic: "Excedente", 
+        question: "Una persona estaba dispuesta a pagar 18 euros por un libro y finalmente lo compra por 12 euros. ¿Cuál es su excedente del consumidor?", 
+        options: { A: "6 euros.", B: "12 euros.", C: "18 euros.", D: "30 euros." }, 
+        answer: "A", 
+        explanation: "El excedente del consumidor es la diferencia entre la disposición máxima a pagar y el precio realmente pagado.",
+        example: "Es la sensación de 'ganga'. Si ibas con 20€ para comprar algo y te costó 15€, esos 5€ que te sobraron son tu excedente."
+    },
+    { 
+        module: "Microeconomía", topic: "Coordinación", 
+        question: "Si el precio de un bien se fija por debajo del precio de coordinación en un mercado competitivo, ¿qué resultado es más probable?", 
+        options: { A: "Exceso de oferta.", B: "Una escasez o desabastecimiento.", C: "Equilibrio.", D: "Baja de calidad." }, 
+        answer: "B", 
+        explanation: "Los apuntes insisten en que un precio por debajo del equilibrio genera escasez porque la cantidad demandada supera a la ofrecida.",
+        example: "Si el gobierno obliga a vender el pan a 0.01€, todos querrán comprar 100 barras pero nadie querrá fabricarlas. Resultado: estanterías vacías."
+    },
+    { 
+        module: "Microeconomía", topic: "Rol de los precios", 
+        question: "Según el bloque sobre precios, ¿cuál es una función central del precio de mercado?", 
+        options: { A: "Garantizar igualdad de renta.", B: "Seleccionar a quienes más valoran el bien y a quienes lo producen con menor coste de oportunidad.", C: "Fijar el valor ético.", D: "Eliminar la competencia." }, 
+        answer: "B", 
+        explanation: "En el resumen de micro se explica que el precio coordina planes y asigna el bien a quienes lo valoran más, mientras atrae a oferentes con menores costes relativos.",
+        example: "Si solo hay una entrada de cine, el precio sube hasta que solo la paga quien más ganas tiene de ir y puede pagarla. El precio decide quién se la queda."
+    },
+    { 
+        module: "Microeconomía", topic: "Elección", 
+        question: "En la elección óptima del consumidor, la relación marginal de sustitución entre dos bienes tiende a igualarse a:", 
+        options: { A: "El coste total.", B: "La renta disponible.", C: "La relación entre los precios de ambos bienes.", D: "La cantidad consumida." }, 
+        answer: "C", 
+        explanation: "Tus apuntes de micro resumen la condición de óptimo como igualdad entre la relación marginal de sustitución y la relación de precios.",
+        example: "Es cuando lo que tú estás dispuesto a sacrificar de un bien por otro (tus gustos) coincide exactamente con lo que el mercado te cobra por ellos."
+    },
+    { 
+        module: "Microeconomía", topic: "Factores de producción", 
+        question: "Según el curso, el precio de un factor productivo se explica principalmente por:", 
+        options: { A: "El coste histórico.", B: "La productividad marginal esperada de ese factor.", C: "La decisión del gobierno.", D: "El valor del bien final." }, 
+        answer: "B", 
+        explanation: "El bloque de salarios y tipos de interés presenta los precios de los factores como derivados de su productividad marginal esperada.",
+        example: "A un futbolista se le paga millones no por lo que le costó aprender a jugar, sino por los goles (productividad) que el club espera que meta en el futuro."
+    },
+    { 
+        module: "Microeconomía", topic: "Salarios", 
+        question: "¿Cuál de estas afirmaciones encaja mejor con el bloque de salarios de tus apuntes?", 
+        options: { A: "Los salarios son fijos.", B: "Dependen de la caridad.", C: "Las mejoras salariales sostenibles dependen sobre todo de aumentos de productividad.", D: "Suben por ley siempre." }, 
+        answer: "C", 
+        explanation: "El resumen rechaza la ley de hierro de los salarios y repite que las mejoras salariales sostenibles requieren productividad más alta.",
+        example: "Si un obrero ahora usa una máquina que hace el triple de piezas, su trabajo vale más y su salario puede subir de forma real y duradera."
+    },
+    { 
+        module: "Microeconomía", topic: "Elasticidad", 
+        question: "Si la demanda de un bien es elástica, una subida de precio tenderá a:", 
+        options: { A: "Subir ingresos.", B: "No afectar nada.", C: "Reducir los ingresos totales.", D: "Aumentar la cantidad." }, 
+        answer: "C", 
+        explanation: "Tus apuntes de elasticidad indican que con demanda elástica, subir el precio reduce lo bastante la cantidad como para bajar los ingresos.",
+        example: "Si subes el precio de los helados y la gente deja de comprarlos casi por completo (son sensibles), al final del día habrás ganado menos dinero que antes."
+    },
+    { 
+        module: "Microeconomía", topic: "Elasticidad cruzada", 
+        question: "Si la elasticidad cruzada entre dos bienes es positiva, lo más probable es que sean:", 
+        options: { A: "Complementarios.", B: "Inferiores.", C: "Bienes sustitutivos.", D: "De lujo." }, 
+        answer: "C", 
+        explanation: "En el resumen de micro, la elasticidad cruzada sirve precisamente para distinguir sustitutivos de complementarios.",
+        example: "Si sube el precio de la Coca-Cola y la gente compra más Pepsi, ambos números suben (+ / + = positivo). Son sustitutos."
+    },
+    { 
+        module: "Microeconomía", topic: "Controles de precios", 
+        question: "Un precio máximo fijado por debajo del precio de mercado suele generar:", 
+        options: { A: "Escasez, colas y posible mercado negro.", B: "Exceso de oferta.", C: "Eficiencia.", D: "Baja de precios futuros." }, 
+        answer: "A", 
+        explanation: "Los apuntes y el PDF sobre controles de precios asocian el precio techo por debajo del mercado con desabastecimiento, racionamiento y mercado negro.",
+        example: "Como el precio es artificialmente bajo, hay más gente queriendo comprar que productos en la tienda. Aparecen las colas y la venta 'por debajo de la mesa'."
+    },
+    { 
+        module: "Microeconomía", topic: "Precios mínimos", 
+        question: "Un precio mínimo fijado por encima del precio de mercado suele provocar:", 
+        options: { A: "Escasez.", B: "Excedentes no vendidos y, en algunos casos, desempleo o capacidad ociosa.", C: "Aumento de ventas.", D: "Equilibrio justo." }, 
+        answer: "B", 
+        explanation: "Tus apuntes destacan que el precio suelo por encima del equilibrio genera excedentes, desempleo o capacidad ociosa y peor asignación.",
+        example: "Si el salario mínimo (precio del trabajo) es muy superior a lo que las empresas pueden pagar, habrá gente queriendo trabajar que no encontrará empleo (excedente de trabajadores)."
+    },
+    { 
+        module: "Microeconomía", topic: "Externalidades", 
+        question: "Si una actividad genera una externalidad negativa y no se internaliza, el mercado tenderá a:", 
+        options: { A: "Producir menos.", B: "Producir más de lo socialmente eficiente.", C: "No producir nada.", D: "Ser eficiente." }, 
+        answer: "B", 
+        explanation: "En el bloque de externalidades se explica que las negativas empujan a sobreproducción o sobreconsumo respecto al óptimo social.",
+        example: "Una fábrica que contamina un río. Como no paga por limpiar el agua, sus costes son bajos y fabrica más de lo que debería si tuviera que pagar por el daño social."
+    },
+    { 
+        module: "Microeconomía", topic: "Teorema de Coase", 
+        question: "Según el teorema de Coase, una solución privada a una externalidad es más plausible cuando:", 
+        options: { A: "Los derechos de propiedad están bien definidos y los costes de transacción son bajos.", B: "El estado interviene.", C: "Los costes son altos.", D: "No hay propiedad." }, 
+        answer: "A", 
+        explanation: "Tus resúmenes de micro recogen exactamente esas dos condiciones: derechos definidos y costes de transacción bajos.",
+        example: "Si el humo de mi barbacoa molesta a mi vecino, pero somos amigos y sabemos de quién es cada jardín, podemos llegar a un acuerdo (yo no hago barbacoa a cambio de algo) sin llamar a la policía."
+    },
+    { 
+        module: "Microeconomía", topic: "Empresa competitiva", 
+        question: "Una empresa competitiva que maximiza beneficios debería producir hasta el punto en que:", 
+        options: { A: "Precio sea menor al coste.", B: "El precio sea igual al coste marginal.", C: "El coste sea cero.", D: "El ingreso sea máximo." }, 
+        answer: "B", 
+        explanation: "El bloque de empresa y beneficios resume la regla de maximización de forma clara: producir hasta que precio iguale al coste marginal.",
+        example: "Si fabricar un pan extra me cuesta 1€ y lo vendo a 1€, ahí paro. Si me costara 1.10€ fabricarlo, perdería dinero vendiéndolo a 1€."
+    },
+    { 
+        module: "Microeconomía", topic: "Largo plazo", 
+        question: "En equilibrio competitivo de largo plazo, la entrada y salida de empresas tiende a llevar el mercado hacia:", 
+        options: { A: "Precio igual a coste medio mínimo.", B: "Monopolio.", C: "Pérdidas.", D: "Precios infinitos." }, 
+        answer: "A", 
+        explanation: "Tus apuntes indican que la entrada y salida empujan al largo plazo hacia una situación de precio igual al coste medio mínimo.",
+        example: "Si vender hamburguesas da mucho dinero, todos abren hamburgueserías. Al haber tantas, el precio baja hasta que ya no hay 'beneficios extra', solo se cubren costes."
+    },
+    { 
+        module: "Microeconomía", topic: "Competencia dinámica", 
+        question: "¿Qué entiende el curso por competencia dinámica?", 
+        options: { A: "Muchos vendedores estáticos.", B: "Un sistema de libre entrada y salida, rivalidad y descubrimiento empresarial.", C: "Precios fijos.", D: "Intervención estatal." }, 
+        answer: "B", 
+        explanation: "En la parte de competencia se diferencia entre la foto estática de muchas empresas y la visión dinámica basada en rivalidad y libre entrada.",
+        example: "No es solo que haya muchas tiendas, es que están todo el tiempo inventando ofertas o mejores productos para 'quitarse' clientes unas a otras."
+    },
+    { 
+        module: "Microeconomía", topic: "Carteles", 
+        question: "¿Por qué los carteles tienden a ser inestables según tus apuntes?", 
+        options: { A: "Por el gobierno.", B: "Por falta de demanda.", C: "Porque pueden entrar nuevos competidores y, además, cada miembro tiene incentivos a hacer trampa.", D: "Son muy estables." }, 
+        answer: "C", 
+        explanation: "Tanto el resumen como el PDF sobre oligopolios y carteles recalcan las dos fuentes de inestabilidad: entrada externa y engaño interno.",
+        example: "Tres gasolineras pactan precios altos, pero una siempre tiene la tentación de bajarlos un poquito en secreto para quedarse con todos los clientes."
+    },
+    { 
+        module: "Microeconomía", topic: "Tipos de bienes", 
+        question: "Una pesquería de acceso libre encaja mejor en la categoría de:", 
+        options: { A: "Bien privado.", B: "Bien público puro.", C: "Monopolio.", D: "Recurso común." }, 
+        answer: "D", 
+        explanation: "En tu esquema de bienes, los recursos comunes son rivales en consumo y no excluibles, justo la lógica de una pesquería abierta.",
+        example: "Cualquiera puede ir a pescar (no excluible), pero el pez que yo pesco ya no lo puedes pescar tú (rivalidad)."
+    },
+    { 
+        module: "Microeconomía", topic: "Comercio internacional", 
+        question: "Un arancel sobre un bien importado tiende a:", 
+        options: { A: "Bajar el precio.", B: "Subir el precio interno, reducir el consumo y generar pérdida irrecuperable.", C: "Ayudar al consumidor.", D: "Aumentar importaciones." }, 
+        answer: "B", 
+        explanation: "Tus apuntes de libre comercio resumen el efecto del arancel como precio interno más alto, menor consumo, menos importaciones y pérdida irrecuperable.",
+        example: "Un impuesto a los coches extranjeros hace que los coches sean más caros en el país. La gente compra menos y la economía en general pierde eficiencia."
+    },
+    { 
+        module: "Macroeconomía", topic: "PIB por gasto", 
+        question: "Según el enfoque del gasto, el PIB se calcula como:", 
+        options: { A: "C+I+G.", B: "C+I+G+X.", C: "C + I + G + X - M.", D: "Ventas totales." }, 
+        answer: "C", 
+        explanation: "El resumen de macro recoge la identidad básica del PIB por gasto: consumo, inversión, gasto público y exportaciones netas.",
+        example: "Sumamos lo que gastan las familias (C), empresas (I), gobierno (G) y lo que vendemos fuera (X), pero restamos lo que compramos fuera (M)."
+    },
+    { 
+        module: "Macroeconomía", topic: "Importaciones", 
+        question: "¿Por qué las importaciones se restan en el PIB por el enfoque del gasto?", 
+        options: { A: "Porque no forman parte de la producción realizada dentro del territorio.", B: "Porque son caras.", C: "Porque no se consumen.", D: "Es un error contable." }, 
+        answer: "A", 
+        explanation: "Tus apuntes recalcan que las importaciones se restan porque ese gasto no corresponde a producción interna.",
+        example: "Si compras un iPhone (fabricado fuera), ese gasto está en tu consumo (C), pero como no se hizo en tu país, hay que restarlo (M) para que el PIB sea real."
+    },
+    { 
+        module: "Macroeconomía", topic: "Valor agregado", 
+        question: "¿Qué problema busca evitar el enfoque del valor agregado por etapas?", 
+        options: { A: "La inflación.", B: "La doble contabilización de bienes intermedios.", C: "El desempleo.", D: "La caída del PIB." }, 
+        answer: "B", 
+        explanation: "Tanto el resumen como el PDF de PIB explican el valor agregado como herramienta para evitar contar varias veces la misma producción.",
+        example: "Si contamos el trigo, luego la harina y luego el pan por separado, estamos contando el mismo trigo tres veces. El valor agregado solo cuenta lo nuevo que aporta cada etapa."
+    },
+    { 
+        module: "Macroeconomía", topic: "PIB nominal y real", 
+        question: "¿Qué mide mejor el PIB real frente al PIB nominal?", 
+        options: { A: "Los precios.", B: "Los cambios en cantidades producidas aislando, en lo posible, el efecto de los precios.", C: "La riqueza total.", D: "La deuda." }, 
+        answer: "B", 
+        explanation: "Tus apuntes subrayan que el PIB nominal mezcla precio y cantidad, mientras el real intenta quedarse con la variación de cantidades.",
+        example: "Si fabricamos 10 coches a 10€, el PIB es 100€. Si el año que viene fabricamos los mismos 10 coches pero a 20€, el PIB nominal sube a 200€, pero la riqueza real es la misma: ¡seguimos teniendo solo 10 coches!"
+    },
+    { 
+        module: "Macroeconomía", topic: "Deflactor del PIB", 
+        question: "Si sube el deflactor del PIB, eso indica que:", 
+        options: { A: "Sube el paro.", B: "Los precios medios de la producción interna están aumentando.", C: "Baja la producción.", D: "Exportamos más." }, 
+        answer: "B", 
+        explanation: "El resumen de macro presenta el deflactor como una medida amplia de precios de la producción interna.",
+        example: "Es como un termómetro de precios para todo lo que se fabrica 'dentro de casa'."
+    },
+    { 
+        module: "Macroeconomía", topic: "IPC y deflactor", 
+        question: "¿Cuál es la diferencia más correcta entre IPC y deflactor del PIB?", 
+        options: { A: "No hay diferencia.", B: "El IPC mide producción.", C: "El IPC se centra en el consumo de los hogares y el deflactor refleja precios de la producción interna.", D: "El deflactor es para el consumo." }, 
+        answer: "C", 
+        explanation: "En tus apuntes se repite que el IPC sirve mejor para coste de vida y el deflactor para precios de lo producido dentro del país.",
+        example: "Si sube el precio de las grúas de construcción, sube el Deflactor. Si sube el precio de la leche, sube el IPC."
+    },
+    { 
+        module: "Macroeconomía", topic: "Flujo y stock", 
+        question: "El PIB es, sobre todo, una variable de tipo:", 
+        options: { A: "Stock.", B: "Flujo.", C: "Estática.", D: "Deuda." }, 
+        answer: "B", 
+        explanation: "El PDF sobre definición de PIB lo trata expresamente como variable flujo, no como stock.",
+        example: "Es como el agua que sale de un grifo por minuto (flujo), no como el agua que ya hay acumulada en la bañera (stock)."
+    },
+    { 
+        module: "Macroeconomía", topic: "Producción y productividad", 
+        question: "La productividad marginal decreciente implica que, si un factor permanece fijo y se añade mucho del otro:", 
+        options: { A: "La producción sube siempre.", B: "El producto marginal del factor variable tiende a caer.", C: "El coste baja.", D: "No afecta." }, 
+        answer: "B", 
+        explanation: "El bloque de función de producción usa este principio para explicar por qué la acumulación de un solo factor tiene límites.",
+        example: "Muchos cocineros en una cocina pequeña terminan estorbándose."
+    },
+    { 
+        module: "Macroeconomía", topic: "Tipo de interés", 
+        question: "Segun tus apuntes, el tipo de interés puede descomponerse en:", 
+        options: { A: "Riesgo y dinero.", B: "Prima temporal, prima de riesgo y prima de liquidez.", C: "Solo inflación.", D: "Salarios y rentas." }, 
+        answer: "B", 
+        explanation: "El resumen de macro descompone el interés en tiempo, riesgo y liquidez, que es una de las ideas centrales del tema.",
+        example: "Te cobro más si tardas mucho en devolverlo (tiempo), si hay riesgo de que no me pagues (riesgo) o si necesito el dinero pronto (liquidez)."
+    },
+    { 
+        module: "Macroeconomía", topic: "VPN y TIR", 
+        question: "Un proyecto con VPN positivo y TIR superior al coste de oportunidad del capital debería:", 
+        options: { A: "Rechazarse.", B: "Aceptarse, ya que crea valor.", C: "Esperar un año.", D: "No se puede saber." }, 
+        answer: "B", 
+        explanation: "Tus apuntes son directos: si el VPN es positivo y la TIR supera el coste de oportunidad, el proyecto crea valor.",
+        example: "Si inviertes 100 y al final tienes 120, y el banco solo te daba 105, ¡el proyecto es un éxito!"
+    },
+    { 
+        module: "Macroeconomía", topic: "Funciones del dinero", 
+        question: "¿Cuál de estas opciones recoge mejor una función del dinero?", 
+        options: { A: "Crear riqueza.", B: "Servir como medio de intercambio y unidad de cuenta.", C: "Pagar deudas públicas.", D: "Ser de oro." }, 
+        answer: "B", 
+        explanation: "En el bloque sobre dinero, los apuntes explican funciones clásicas como medio de intercambio, unidad de cuenta y depósito de valor.",
+        example: "Lo usamos para no tener que cambiar una vaca por 50 gallinas (intercambio) y para saber cuánto vale cada cosa (unidad de cuenta)."
+    },
+    { 
+        module: "Macroeconomía", topic: "Teorías de la inflación", 
+        question: "¿Qué subraya la visión cualitativista de la inflación?", 
+        options: { A: "Solo la oferta de dinero.", B: "Que la demanda de dinero, su liquidez y la confianza también importan.", C: "Que el oro no sirve.", D: "Que el estado debe fijar precios." }, 
+        answer: "B", 
+        explanation: "El resumen de macro insiste en que no basta mirar la oferta monetaria: también importa la demanda de dinero y su calidad.",
+        example: "Aunque no imprimas billetes nuevos, si la gente pierde la confianza y quiere soltar sus billetes rápido, los precios subirán."
+    },
+    { 
+        module: "Macroeconomía", topic: "Política monetaria", 
+        question: "Si un banco central compra activos en mercado abierto, normalmente:", 
+        options: { A: "Sube el paro.", B: "Inyecta liquidez, eleva el precio del activo y tiende a bajar su rendimiento.", C: "Baja la inflación.", D: "Drena dinero." }, 
+        answer: "B", 
+        explanation: "Tus apuntes explican que la compra de activos inyecta reservas, sube el precio del activo y reduce su rendimiento.",
+        example: "El Banco Central 'compra' papeles y a cambio mete dinero fresco en los bancos para que estos puedan prestar más."
+    },
+    { 
+        module: "Macroeconomía", topic: "Creación bancaria", 
+        question: "Los bancos comerciales no pueden crear dinero ilimitadamente porque enfrentan límites de:", 
+        options: { A: "Papel moneda.", B: "Liquidez, solvencia, demanda de crédito solvente y conversión en dinero del banco central.", C: "Horarios de apertura.", D: "Número de clientes." }, 
+        answer: "B", 
+        explanation: "El bloque de dinero bancario insiste en esos límites: liquidez, solvencia, crédito solvente y conversión final en dinero del banco central.",
+        example: "Un banco no puede prestar dinero a cualquiera si sabe que no se lo van a devolver (solvencia) o si no tiene dinero en la caja por si alguien viene a retirar (liquidez)."
+    },
+    { 
+        module: "Macroeconomía", topic: "Política fiscal", 
+        question: "Una política fiscal expansiva suele implicar:", 
+        options: { A: "Subir impuestos.", B: "Bajar el gasto.", C: "Bajar impuestos o subir gasto, aumentando el sesgo expansivo del saldo fiscal.", D: "No hacer nada." }, 
+        answer: "C", 
+        explanation: "Tus apuntes de política fiscal resumen el enfoque convencional así: menos impuestos o más gasto equivalen a un sesgo expansivo.",
+        example: "El Gobierno gasta dinero en carreteras o te cobra menos impuestos para que tú tengas más dinero y gastes."
+    },
+    { 
+        module: "Macroeconomía", topic: "Estabilizadores", 
+        question: "¿Cuál de los siguientes es un estabilizador automático?", 
+        options: { A: "Obras públicas nuevas.", B: "El seguro de desempleo que aumenta el gasto cuando entra la recesión.", C: "Subir tipos de interés.", D: "Imprimir billetes." }, 
+        answer: "B", 
+        explanation: "El resumen de macro cita de forma expresa el seguro de desempleo y la caída automática de recaudación en recesión.",
+        example: "Como los amortiguadores de un coche, actúan solos cuando hay un bache económico."
+    },
+    { 
+        module: "Macroeconomía", topic: "Multiplicador", 
+        question: "¿Cuál es una de las críticas principales al multiplicador fiscal?", 
+        options: { A: "No existe.", B: "Que el endeudamiento público puede desplazar financiación privada mediante crowding out.", C: "Que es muy lento.", D: "Que solo ayuda a ricos." }, 
+        answer: "B", 
+        explanation: "Tus apuntes recogen varias críticas, y una de las más claras es el crowding out: deuda publica que desplaza credito privado.",
+        example: "Si el Estado se lleva todos los préstamos del banco, no queda dinero para que las familias pidan una hipoteca."
+    },
+    { 
+        module: "Macroeconomía", topic: "Modelo de Solow", 
+        question: "En el modelo de Solow, si la inversión por trabajador supera la depreciación más la dilución, entonces:", 
+        options: { A: "El capital cae.", B: "El capital por trabajador se profundiza y aumenta.", C: "La economía se detiene.", D: "No hay cambio." }, 
+        answer: "B", 
+        explanation: "El resumen de Solow distingue entre ampliación y profundización del capital: si la inversión supera depreciación y dilución, k por trabajador aumenta.",
+        example: "Si compras máquinas nuevas más rápido de lo que se rompen las viejas y de lo que crece la población, cada trabajador tendrá más máquinas para producir."
+    },
+    { 
+        module: "Macroeconomía", topic: "Regla de oro de Solow", 
+        question: "La regla de oro de Solow busca el nivel de capital por trabajador que:", 
+        options: { A: "Maximiza el consumo sostenible de largo plazo.", B: "Maximiza el PIB.", C: "Elimina el paro.", D: "Es cero." }, 
+        answer: "A", 
+        explanation: "Tus apuntes aclaran que la regla de oro no busca acumular sin límite, sino el capital que maximiza el consumo sostenible.",
+        example: "No sirve de nada tener mil máquinas si para mantenerlas hay que ahorrar tanto que no nos queda dinero para comer (consumir)."
+    },
+    { 
+        module: "Macroeconomía", topic: "Mercado de trabajo", 
+        question: "Si el salario mínimo sube claramente por encima de la productividad, tenderá a:", 
+        options: { A: "Aumentar el empleo.", B: "Reducir la demanda de trabajo de esas personas.", C: "No afectar.", D: "Mejorar la economía." }, 
+        answer: "B", 
+        explanation: "El resumen de macro relaciona salario máximo sostenible y productividad económica; si el salario exigido supera esa productividad, cae la demanda de trabajo.",
+        example: "Si un trabajador produce 10€ de valor a la hora y por ley hay que pagarle 15€, la empresa perderá dinero y acabará despidiéndolo."
+    }
 ];
 
 let currentIdx = 0, score = 0, answered = false;
 const qText = document.getElementById('question'), optBox = document.getElementById('options'), 
       topicLabel = document.getElementById('topic-title'), progressLabel = document.getElementById('progress'), 
       feedback = document.getElementById('feedback'), descText = document.getElementById('desc'), 
+      exampleText = document.getElementById('example-text'),
       nextBtn = document.getElementById('next'), quizBox = document.getElementById('quiz'), resultBox = document.getElementById('result');
 
 function load() {
@@ -116,6 +404,7 @@ function check(choice, btn) {
     if (choice === correct) { score++; btn.classList.add('correct'); } 
     else { btn.classList.add('incorrect'); btns.forEach(b => { if (b.textContent.startsWith(correct)) b.classList.add('correct'); }); }
     descText.textContent = questionsData[currentIdx].explanation;
+    exampleText.textContent = questionsData[currentIdx].example;
     feedback.classList.remove('hidden'); nextBtn.classList.remove('hidden');
 }
 
